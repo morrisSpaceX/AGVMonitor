@@ -40,4 +40,19 @@ public:
     afx_msg void OnBnClickedButtonShowmap();
     afx_msg void OnBnClickedButtonDijkstra();
     afx_msg void OnBnClickedButtonNet();
+
+private:
+	// 控制响应鼠标消息的标志位
+	bool			m_bMouseAppoint;	// 是否在指定点号
+	bool			m_bFirstInput;		// 是否第一次导入场地
+	unsigned		m_uCurNum;			// 当前点号
+
+	CMap<unsigned, unsigned, CPoint, CPoint> m_mapPoint; // 点号，坐标 映射
+
+public:
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	virtual void OnOK();
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnClickedButtonOutput();
 };

@@ -80,6 +80,8 @@ public:
 // Implementation
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
+//	afx_msg void OnButtonOutput();
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(CAboutDlg::IDD)
@@ -92,6 +94,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
+//	ON_COMMAND(IDC_BUTTON_OUTPUT, &CAboutDlg::OnButtonOutput)
 END_MESSAGE_MAP()
 
 
@@ -104,6 +107,9 @@ CtimerAppDlg::CtimerAppDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CtimerAppDlg::IDD, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_bMouseAppoint = false;
+	m_bFirstInput = true;
+	m_uCurNum = 0;
 }
 
 void CtimerAppDlg::DoDataExchange(CDataExchange* pDX)
@@ -120,6 +126,10 @@ BEGIN_MESSAGE_MAP(CtimerAppDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BUTTON_SHOWMAP, &CtimerAppDlg::OnBnClickedButtonShowmap)
     ON_BN_CLICKED(IDC_BUTTON_DIJKSTRA, &CtimerAppDlg::OnBnClickedButtonDijkstra)
     ON_BN_CLICKED(IDC_BUTTON_NET, &CtimerAppDlg::OnBnClickedButtonNet)
+	ON_WM_LBUTTONDOWN()
+	ON_WM_MOUSEMOVE()
+	ON_WM_RBUTTONDOWN()
+	ON_BN_CLICKED(IDC_BUTTON_OUTPUT, &CtimerAppDlg::OnClickedButtonOutput)
 END_MESSAGE_MAP()
 
 
@@ -155,6 +165,8 @@ BOOL CtimerAppDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
+
+
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -216,7 +228,16 @@ void CtimerAppDlg::OnPaint()
 	
 	BITMAP bm;
 	bitmap.GetBitmap(&bm);
-	pDC->StretchBlt(0, 0, rcClient.right - rcWatch.right - 15, rcClient.bottom, &memDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
+	pDC->StretchBlt(0, 0, rcClient.right - rcWatch.right - 15, rcClient.bottom, 
+		&memDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
+
+	// 弹出提示框;
+	if (m_bFirstInput) {
+		if (IDOK == AfxMessageBox(_T("第一次导入场地需要指定点号，左键单击确定，右键取消，点击ok键完成。")))
+			m_bMouseAppoint = true; // 用户开始指定点号
+		m_bFirstInput = false;
+	}
+		
 }
 
 // The system calls this function to obtain the cursor to display while the user drags
@@ -287,5 +308,129 @@ void CtimerAppDlg::OnBnClickedButtonNet()
 
     NetServer * pNS = new NetServer();
     pNS->Run(0);
+
+}
+
+
+void CtimerAppDlg::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	if (m_bMouseAppoint)
+	{
+		++m_uCurNum;
+		// 保存点的坐标
+		m_mapPoint[m_uCurNum] = point;
+	}
+
+	CDialogEx::OnLButtonDown(nFlags, point);
+}
+
+
+void CtimerAppDlg::OnOK()
+{
+	// TODO: 在此添加专用代码和/或调用基类
+	m_bMouseAppoint = false;
+
+	OnPaint(); 
+	
+	// CDialogEx::OnOK();
+}
+
+
+void CtimerAppDlg::OnMouseMove(UINT nFlags, CPoint point)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	CString strMsg;
+	CBitmap bitmap;
+	if (m_bMouseAppoint)
+	{
+		CDC* pDC = GetDC();
+		CDC memDC;
+		memDC.CreateCompatibleDC(pDC);
+		
+		// 获取区域大小
+		RECT rc;
+		GetClientRect(&rc);
+		CStatic* pWatcher = (CStatic*)GetDlgItem(IDC_STATIC_WATCHER);
+		RECT rcWatch;
+		pWatcher->GetClientRect(&rcWatch);
+
+		bitmap.LoadBitmapW(IDB_BITMAP_REPO3);
+		memDC.SelectObject(&bitmap);
+
+		// 获取位图信息
+		BITMAP bm;
+		bitmap.GetBitmap(&bm);
+
+		strMsg.Format(_T("请设置点号%d"), m_uCurNum+1);
+		float xRatio = bm.bmWidth * 1.0f / (rc.right - rcWatch.right);
+		float yRatio = bm.bmHeight * 1.0f / rc.bottom;
+		memDC.TextOutW(int(point.x * xRatio), int(point.y * yRatio), strMsg);
+
+		// 显示数字
+		POSITION pos = m_mapPoint.GetStartPosition();
+		unsigned key;
+		CPoint pt;
+		while (pos)
+		{
+			m_mapPoint.GetNextAssoc(pos, key, pt);
+			strMsg.Format(_T("%d"), key);
+			memDC.TextOutW(int(pt.x * xRatio), int(pt.y * yRatio), strMsg);
+		}
+
+		pDC->StretchBlt(0, 0, rc.right - rcWatch.right - 15, rc.bottom,
+			&memDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
+	}
+
+	CDialogEx::OnMouseMove(nFlags, point);
+}
+
+
+void CtimerAppDlg::OnRButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	if (m_bMouseAppoint)
+	{
+		if (m_mapPoint.IsEmpty()){
+			m_uCurNum = 0;
+			return;
+		}
+
+		m_mapPoint.RemoveKey(m_mapPoint.GetCount());
+		--m_uCurNum;
+	}
+
+	CDialogEx::OnRButtonDown(nFlags, point);
+}
+
+
+//void CAboutDlg::OnButtonOutput()
+//{
+//	// TODO: 在此添加命令处理程序代码
+//}
+
+
+void CtimerAppDlg::OnClickedButtonOutput()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	TCHAR szPath[MAX_PATH];
+	SHGetFolderPath(nullptr, CSIDL_DESKTOP, nullptr, 0, szPath);
+
+	PathAppend(szPath, _T("点号&坐标.txt"));
+
+	CStdioFile file(szPath, 
+		CFile::modeWrite | CFile::modeCreate | CFile::typeText);
+
+	POSITION pos = m_mapPoint.GetStartPosition();
+	unsigned key;
+	CPoint pt;
+	CString str;
+	file.WriteString(_T("点号\t坐标\n"));
+	while (pos)
+	{
+		m_mapPoint.GetNextAssoc(pos, key, pt);
+		str.Format(_T("%d\t(%d,%d)\n"), key, pt.x, pt.y);
+		file.WriteString(str);
+	}
 
 }
