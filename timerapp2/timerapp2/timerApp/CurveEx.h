@@ -54,12 +54,15 @@ public:
     int updateCavas(int reserved);
     CDC *m_pDC;
     int generateRouteTrace(CDC * pMemDC, CBitmap * pMemBitMap);
+	inline Graph* GetGraph() const { return m_baseGraph; }
+
 private:
     ListCollection *m_pLC;
     forward_list <dotpix> m_fl;
     forward_list <dotpix> m_fl2;
     // array<array<int, 2>, 3 > myarray2D;
     int m_img[1920][1080];
+
 public:
     CBitmap *m_pOldBitMap;
     int updateTrace(void);
@@ -75,7 +78,7 @@ public:
     queue<dotpix> m_pixHistory;
     QueueHistory    m_qh;
 
-    int demoLinkTable(int n);
+    int demoLinkTable(int src, int tar);
 };
 
 

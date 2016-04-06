@@ -415,19 +415,29 @@ int CurveEx::buildTrace(void)
 }
 
 #define TARGET_VERTEX   (17)
-int CurveEx::demoLinkTable(int n)
+int CurveEx::demoLinkTable(int src, int tar)
 {
-	m_baseGraph->generateSideNo();
-    Vertex te;
-    list<Vertex> newList;
 
-    te.vertexNo = 3;
-    m_baseGraph->UnweightedGraph(&te);
+	Vertex te;
+	list<Vertex> newList;
+
+	// 生成段号
+	static bool bGen = true;
+	if (bGen) {
+		m_baseGraph->generateSideNo();
+		bGen = false;
+	}
+
+	te.vertexNo = src;
+	m_baseGraph->UnweightedGraph(&te);
 
     memset(&te, 0, sizeof(Vertex));
-    te.vertexNo = TARGET_VERTEX;
+    te.vertexNo = tar;
     m_baseGraph->printPath(&te);
     TRACE("Target(%d)\n", TARGET_VERTEX);
-    m_baseGraph->copyNewList(newList);
+	m_baseGraph->GetRoute().push_back(tar);
+	m_baseGraph->ResetVertex(); // 重置关系，解决只能2-3，不能3-2的问题
+
+    // m_baseGraph->copyNewList(newList);
     return 0;
 }

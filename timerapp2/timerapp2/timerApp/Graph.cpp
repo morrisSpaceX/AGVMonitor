@@ -197,6 +197,7 @@ int Graph::printPath(Vertex * vertex)
     if (it->vertexNo == m_startVertex)
     {
         TRACE("Source(%d)\n", m_startVertex);
+		// m_vecRoute.push_back(vertex->vertexNo);
         return 0;
     }
 
@@ -211,6 +212,7 @@ int Graph::printPath(Vertex * vertex)
         // TRACE(" to");
     }
     TRACE("(%d)\n", vv.vertexNo);
+	m_vecRoute.push_back(vv.vertexNo);
 
     return 0;
 }
@@ -291,4 +293,15 @@ int Graph::generateSideNo()
 		}
 	}
 	return(0);
+}
+
+void Graph::ResetVertex()
+{
+	// list<Vertex>
+	for(auto& vertex : m_vertex)
+	{ 
+		vertex.Dist = VERT_DISTANCE;
+		vertex.Known = Unknown;
+		vertex.Path = Unpath;
+	}
 }

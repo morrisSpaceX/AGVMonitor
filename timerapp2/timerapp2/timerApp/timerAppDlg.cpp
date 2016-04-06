@@ -10,6 +10,9 @@
 #include "NetServer.h"
 #include "NetMsgASync.h"
 
+#include "MsgStruct.h"
+#include "SimulateDlg.h"
+
 
 #pragma   comment(lib, "ws2_32.lib ") 
 
@@ -130,6 +133,7 @@ BEGIN_MESSAGE_MAP(CtimerAppDlg, CDialogEx)
 	ON_WM_MOUSEMOVE()
 	ON_WM_RBUTTONDOWN()
 	ON_BN_CLICKED(IDC_BUTTON_OUTPUT, &CtimerAppDlg::OnClickedButtonOutput)
+	ON_BN_CLICKED(IDC_BUTTON_AGVMSG, &CtimerAppDlg::OnBnClickedButtonAgvmsg)
 END_MESSAGE_MAP()
 
 
@@ -228,7 +232,7 @@ void CtimerAppDlg::OnPaint()
 	
 	BITMAP bm;
 	bitmap.GetBitmap(&bm);
-	pDC->StretchBlt(0, 0, rcClient.right - rcWatch.right - 15, rcClient.bottom, 
+	pDC->StretchBlt(0, 0, rcClient.right - rcWatch.right - 15, rcClient.bottom,
 		&memDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
 
 	// 弹出提示框;
@@ -259,17 +263,54 @@ void CtimerAppDlg::OnBnClickedButtonStartTimer()
 void CtimerAppDlg::OnTimer(UINT_PTR nIDEvent)
 {
     // TODO: Add your message handler code here and/or call default
-    wchar_t buffer[2256];
-    if (0) {
-        m_curveEx.updateTrace();
-    } else {
-        m_curveEx.buildTrace();
-    }
-    wsprintf(buffer, L"X=%d", m_curveEx.m_point.x);
-    GetDlgItem(IDC_STATIC_X)->SetWindowText(buffer);
-    wsprintf(buffer, L"y=%d", m_curveEx.m_point.y);
-    GetDlgItem(IDC_STATIC_Y)->SetWindowText(buffer);
-    CDialogEx::OnTimer(nIDEvent);
+	if (2 == nIDEvent)
+	{
+		CDC* pdc = GetDC();
+		CDC memdc;
+		memdc.CreateCompatibleDC(pdc);
+		CBitmap bitmap;
+		bitmap.LoadBitmapW(IDB_BITMAP_REPO3);
+
+		CStatic* pWatcher = (CStatic*)GetDlgItem(IDC_STATIC_WATCHER);
+		RECT rcWatch;
+		pWatcher->GetClientRect(&rcWatch);
+
+		memdc.SelectObject(&bitmap);
+		if (m_vecPoint.end() == m_curPointIt) {
+			KillTimer(2);
+			return;
+		}
+
+		RECT rc;
+		GetClientRect(&rc);
+
+		BITMAP bm;
+		bitmap.GetBitmap(&bm);
+
+		CPoint& pt = *m_curPointIt;
+		float xRatio = bm.bmWidth * 1.0f / (rc.right - rcWatch.right);
+		float yRatio = bm.bmHeight * 1.0f / rc.bottom;
+		memdc.Ellipse(int((pt.x - 5) * xRatio), int((pt.y - 5) * yRatio),
+			int((pt.x + 5) * xRatio), int((pt.y + 5) * yRatio));
+		advance(m_curPointIt, 1);
+
+		pdc->StretchBlt(0, 0, rc.right - rcWatch.right - 15, rc.bottom,
+			&memdc, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
+	}
+	else {
+		wchar_t buffer[2256];
+		if (0) {
+			m_curveEx.updateTrace();
+		}
+		else {
+			m_curveEx.buildTrace();
+		}
+		wsprintf(buffer, L"X=%d", m_curveEx.m_point.x);
+		GetDlgItem(IDC_STATIC_X)->SetWindowText(buffer);
+		wsprintf(buffer, L"y=%d", m_curveEx.m_point.y);
+		GetDlgItem(IDC_STATIC_Y)->SetWindowText(buffer);
+	}
+	CDialogEx::OnTimer(nIDEvent);
 }
 
 
@@ -292,7 +333,7 @@ void CtimerAppDlg::OnBnClickedButtonShowmap()
 void CtimerAppDlg::OnBnClickedButtonDijkstra()
 {
     // TODO: Add your control notification handler code here
-    m_curveEx.demoLinkTable(0);
+    m_curveEx.demoLinkTable(m_msgM6->agvno, m_msgM6->target);
 
 }
 
@@ -404,11 +445,6 @@ void CtimerAppDlg::OnRButtonDown(UINT nFlags, CPoint point)
 }
 
 
-//void CAboutDlg::OnButtonOutput()
-//{
-//	// TODO: 在此添加命令处理程序代码
-//}
-
 
 void CtimerAppDlg::OnClickedButtonOutput()
 {
@@ -433,4 +469,34 @@ void CtimerAppDlg::OnClickedButtonOutput()
 		file.WriteString(str);
 	}
 
+}
+
+
+void CtimerAppDlg::OnBnClickedButtonAgvmsg()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CSimulateDlg dlg(this);
+	if (IDOK == dlg.DoModal())
+	{
+		// 计算行走路线
+		OnBnClickedButtonDijkstra();
+
+		Graph* pGraph = m_curveEx.GetGraph();
+		CPoint pt;
+		m_vecPoint.clear();
+		for (auto pointNo : pGraph->GetRoute())
+		{
+			// 获取点号对应的坐标
+			m_mapPoint.Lookup(pointNo, pt);
+			m_vecPoint.push_back(pt);
+		}
+		pGraph->GetRoute().clear();
+
+		m_curPointIt = m_vecPoint.begin();
+		//m_nextPointIt = m_curPointIt + 1;
+		//if (m_nextPointIt == m_vecPoint.end())
+		//	return;
+		
+		SetTimer(2, 1000, nullptr);
+	}
 }

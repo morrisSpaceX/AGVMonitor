@@ -108,12 +108,14 @@
     <ClInclude Include="Graph.h" />
     <ClInclude Include="Header.h" />
     <ClInclude Include="ListCollection.h" />
+    <ClInclude Include="MsgStruct.h" />
     <ClInclude Include="MySocket.h" />
     <ClInclude Include="NetMsg.h" />
     <ClInclude Include="NetMsgASync.h" />
     <ClInclude Include="NetServer.h" />
     <ClInclude Include="QueueHistory.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="SimulateDlg.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TableEntry.h" />
     <ClInclude Include="targetver.h" />
@@ -129,6 +131,7 @@
     <ClCompile Include="NetMsgASync.cpp" />
     <ClCompile Include="NetServer.cpp" />
     <ClCompile Include="QueueHistory.cpp" />
+    <ClCompile Include="SimulateDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\myn">
+      <UniqueIdentifier>{63dd0ea4-8849-410a-8584-73ed3ca10d3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\myn">
+      <UniqueIdentifier>{5f139dab-8fa1-4ce9-925b-fdb47b5446bc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -69,6 +75,12 @@
     <ClInclude Include="NetMsgASync.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MsgStruct.h">
+      <Filter>Header Files\myn</Filter>
+    </ClInclude>
+    <ClInclude Include="SimulateDlg.h">
+      <Filter>Header Files\myn</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="timerApp.cpp">
@@ -103,6 +115,9 @@
     </ClCompile>
     <ClCompile Include="NetMsgASync.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SimulateDlg.cpp">
+      <Filter>Source Files\myn</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

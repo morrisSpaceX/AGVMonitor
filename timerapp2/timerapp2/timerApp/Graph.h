@@ -83,15 +83,22 @@ public:
     int printPath(Vertex * vertex);
 	// 生成段的编号
 	int generateSideNo();
+	inline vector<int>& GetRoute() { return m_vecRoute; }
+	inline map<SIDE, unsigned>& GetSideNoMap() { return m_sideNo; }
+	// 重置关系，解决只能2-3，不能3-2的问题
+	void ResetVertex();
+
 private:
     int m_startVertex;
     list<Vertex> m_vertex;
 	// 保存段的编号
 	map<SIDE, unsigned> m_sideNo;
-
+	// 行走路线
+	vector<int>		m_vecRoute;
 public:
     list<Vertex>::iterator findV2(list<Vertex>::iterator W);
     int setDist2(Vertex * vertex);
     int copyNewList(list<Vertex> & newList);
+
 };
 
