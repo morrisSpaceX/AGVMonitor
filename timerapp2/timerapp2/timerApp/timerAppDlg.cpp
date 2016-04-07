@@ -30,11 +30,11 @@ UINT WorkForce2(LPVOID lpParam)
     g_mux.Lock();
     AfxSocketInit();
 
-    BOOL bOptVal = TRUE;
-    int bOptLen = sizeof(BOOL);
+    //BOOL bOptVal = TRUE;
+    //int bOptLen = sizeof(BOOL);
     // int nPort = *((int*)lpParam);
     NetMsgASync * pServerSocket = new NetMsgASync();
-    NetMsgASync * pReceiveSocket = new NetMsgASync();
+    // NetMsgASync * pReceiveSocket = new NetMsgASync();
 
     {
         // pServerSocket->Create(SVR_PORT);
@@ -54,9 +54,9 @@ UINT WorkForce2(LPVOID lpParam)
         pServerSocket->Create(SVR_PORT);
 //            /*L"10.166.206.59"*/L"127.0.0.1");
         TRACE("main:listen()\n");
-        pServerSocket->Listen(10);
+        pServerSocket->Listen(100);
         TRACE("main:delete(%d)\n");
-        delete pReceiveSocket;
+        // delete pReceiveSocket;
         // delete pServerSocket;
     }
     g_mux.Unlock();
@@ -134,6 +134,7 @@ BEGIN_MESSAGE_MAP(CtimerAppDlg, CDialogEx)
 	ON_WM_RBUTTONDOWN()
 	ON_BN_CLICKED(IDC_BUTTON_OUTPUT, &CtimerAppDlg::OnClickedButtonOutput)
 	ON_BN_CLICKED(IDC_BUTTON_AGVMSG, &CtimerAppDlg::OnBnClickedButtonAgvmsg)
+//	ON_BN_CLICKED(IDC_BUTTON_STARTSERVER, &CtimerAppDlg::OnBnClickedButtonStartserver)
 END_MESSAGE_MAP()
 
 
@@ -342,10 +343,8 @@ void CtimerAppDlg::OnBnClickedButtonNet()
 {
     //char MsgBuf[1024];
     // TODO: Add your control notification handler code here
-
+	//  AfxSocketInit(); create socket; listen;
     WorkForce2(0);
-
-
 
     NetServer * pNS = new NetServer();
     pNS->Run(0);
@@ -500,3 +499,10 @@ void CtimerAppDlg::OnBnClickedButtonAgvmsg()
 		SetTimer(2, 1000, nullptr);
 	}
 }
+
+
+//void CtimerAppDlg::OnBnClickedButtonStartserver()
+//{
+//	// TODO: 在此添加控件通知处理程序代码
+//
+//}
