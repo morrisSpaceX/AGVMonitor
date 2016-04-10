@@ -37,5 +37,5 @@ public:
     afx_msg void OnTimer(UINT_PTR nIDEvent);
     int drawEclipseOldWay();
     int replaySimpleCurve();
-    int pp;
+    int pp; // add comments just make ure this GIT branch works
 };
